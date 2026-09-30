@@ -17,9 +17,20 @@
 dsh plugin --profile web add dsh-model-health
 ```
 
+### From GitHub
+
+```sh
+dsh plugin --profile web add github:oxlyn/dsh-model-health
+
+# This fork (also supports the dsh 0.2.x line; verified on 0.2.0-rc.2):
+dsh plugin --profile desktop add github:yk2516/dsh-model-health
+```
+
 ### From source
 
 ```sh
+# Upstream; for this fork (which supports the dsh 0.2.x line) use
+# https://github.com/yk2516/dsh-model-health.git instead
 git clone https://github.com/oxlyn/dsh-model-health.git
 cd dsh-model-health
 pnpm install
@@ -87,6 +98,7 @@ Technical notes: pure ESM (`"type": "module"`); cordis is a peerDependency provi
 ## Requirements
 
 - Node `^22.19.0 || >=24.0.0` (required by the DSH host)
+- DSH `^0.1.0-rc.8 || ^0.2.0-rc.1` (both the 0.1.x and 0.2.x runtime lines)
 - pnpm (for building from source)
 
 ## Development
@@ -113,8 +125,18 @@ dsh-model-health/
 
 ## Dependencies
 
-- `@deepseek-ai/dsh-tools`: `0.1.0-rc.8` (exact — the **`next`**-tag line; npm `latest` is stale).
-- `@deepseek-ai/cordis`: `^4.0.1` (peerDependency — host provides it; types-only in code).
+All peers use the range `^0.1.0-rc.8 || ^0.2.0-rc.1`, so one build serves both runtime lines:
+
+- `@deepseek-ai/dsh-tools` — `defineTool` registration (identical signature on both lines)
+- `@deepseek-ai/dsh-host-webserver` — `ctx.webServer.register` HTTP routes
+- `@deepseek-ai/dsh-credentials` — `ctx.credentials.resolve` for API keys
+- `@deepseek-ai/cordis`: `^4.0.1` (peerDependency — host provides it; types-only in code)
+
+> **Why `|| ^0.2.0-rc.1` is required**: DSH's install-time compatibility gate only checks peers named
+> `@deepseek-ai/dsh` or `@deepseek-ai/dsh-*`, and compares them against the **runtime version** via
+> `semver.satisfies(runtime, range, { includePrerelease: true })`. With only `^0.1.0-rc.8`, dsh 0.2.0-rc.2
+> is rejected because of 0.x caret semantics (`^0.1.0-rc.8` ≡ `>=0.1.0-rc.8 <0.2.0`), and the install is
+> refused outright (`dsh: installation rejected: ... peerDependencies {...}`).
 
 ## Links
 

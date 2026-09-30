@@ -17,9 +17,19 @@
 dsh plugin --profile web add dsh-model-health
 ```
 
+### GitHub 安装
+
+```sh
+dsh plugin --profile web add github:oxlyn/dsh-model-health
+
+# 本 fork（额外兼容 dsh 0.2.x；已在 0.2.0-rc.2 实测通过）：
+dsh plugin --profile desktop add github:yk2516/dsh-model-health
+```
+
 ### 源码安装
 
 ```sh
+# 上游；若用本 fork（支持 dsh 0.2.x）换成 https://github.com/yk2516/dsh-model-health.git
 git clone https://github.com/oxlyn/dsh-model-health.git
 cd dsh-model-health
 pnpm install
@@ -86,6 +96,7 @@ dsh --profile web --dump-config | grep dsh-model-health   # 配置层含本行
 ## 环境要求 / Requirements
 
 - Node `^22.19.0 || >=24.0.0`（DSH 宿主要求）
+- DSH `^0.1.0-rc.8 || ^0.2.0-rc.1`（同时支持 0.1.x 与 0.2.x 两代运行时）
 - pnpm（源码构建用）
 
 ## 开发 / Development
@@ -112,8 +123,17 @@ dsh-model-health/
 
 ## 依赖锁定 / Dependencies
 
-- `@deepseek-ai/dsh-tools`: `0.1.0-rc.8` (exact — the **`next`**-tag line; npm `latest` is stale).
-- `@deepseek-ai/cordis`: `^4.0.1` (peerDependency — host provides it; types-only in code).
+peer 范围统一为 `^0.1.0-rc.8 || ^0.2.0-rc.1`，同一份代码同时兼容 0.1.x 与 0.2.x 两代 DSH 运行时：
+
+- `@deepseek-ai/dsh-tools` — `defineTool` 工具注册（两代签名一致）
+- `@deepseek-ai/dsh-host-webserver` — `ctx.webServer.register` 注册 HTTP 路由
+- `@deepseek-ai/dsh-credentials` — `ctx.credentials.resolve` 解析 API Key
+- `@deepseek-ai/cordis`: `^4.0.1`（peerDependency — 宿主提供；代码中仅 `import type`）
+
+> **为什么必须写 `|| ^0.2.0-rc.1`**：DSH 的插件兼容性门禁只校验 `@deepseek-ai/dsh` / `@deepseek-ai/dsh-*`
+> 前缀的 peer，且拿**运行时版本**去比（`semver.satisfies(runtime, range, { includePrerelease: true })`）。
+> 只写 `^0.1.0-rc.8` 时，0.2.0-rc.2 会因 semver 的 0.x 语义（`^0.1.0-rc.8` ≡ `>=0.1.0-rc.8 <0.2.0`）
+> 被判为不兼容，安装直接被拒绝（`dsh: installation rejected: ... peerDependencies {...}`）。
 
 ## 友情链接 / Links
 
